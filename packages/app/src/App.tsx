@@ -36,11 +36,17 @@ import { AppRouter, FlatRoutes } from '@backstage/core-app-api';
 import { CatalogGraphPage } from '@backstage/plugin-catalog-graph';
 import { RequirePermission } from '@backstage/plugin-permission-react';
 import { catalogEntityCreatePermission } from '@backstage/plugin-catalog-common/alpha';
-import { ThemeProvider } from '@material-ui/core/styles';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import LightIcon from '@material-ui/icons/WbSunny';
 import { myTheme } from './theme/myTheme';
 import { UnifiedThemeProvider } from '@backstage/theme';
+import { githubAuthApiRef } from '@backstage/core-plugin-api';
+
+const githubAuthCfg = {
+  id: 'github-auth-provider',
+  title: 'GitHub',
+  message: 'Sign in using GitHub',
+  apiRef: githubAuthApiRef,
+} 
 
 const app = createApp({
   apis,
@@ -62,7 +68,7 @@ const app = createApp({
     });
   },
   components: {
-    SignInPage: props => <SignInPage {...props} auto providers={['guest']} />,
+    SignInPage: props => <SignInPage {...props} auto providers={['guest', githubAuthCfg]} />,
   },
   themes: [{
     id: 'my-theme',
