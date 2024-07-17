@@ -29,21 +29,22 @@ backend:
   # The production database configuration is stored in app-config.production.yaml
   database:
     client: better-sqlite3
-    connection: ':memory:'
+    # sqlite is configured by default to store in-memory
+    connection: # ':memory:'
+      directory: '/Users/mylescoleman/Desktop/Bootcamp/backstage-test/backstage/data/backstage.sqlite'
   # workingDirectory: /tmp # Use this to configure a working directory for the scaffolder, defaults to the OS temp-dir
 
 integrations:
   github:
     - host: github.com
-      # This is a Personal Access Token or PAT from GitHub. You can find out how to generate this token, and more information
-      # about setting up the GitHub integration here: https://backstage.io/docs/integrations/github/locations#configuration
-      token: ${GITHUB_TOKEN}
+      apps: 
+        - $include: github-app-backstage-myles-credentials.yaml
     ### Example for how to add your GitHub Enterprise instance using the API:
     # - host: ghe.example.net
     #   apiBaseUrl: https://ghe.example.net/api/v3
     #   token: ${GHE_TOKEN}
 
-proxy:
+# proxy:
   ### Example for how to add a proxy endpoint for the frontend.
   ### A typical reason to do this is to handle HTTPS and CORS for internal services.
   # endpoints:
@@ -73,25 +74,51 @@ auth:
           resolvers:
             - resolver: usernameMatchingUserEntityName
 
-scaffolder:
+# scaffolder:
   # see https://backstage.io/docs/features/software-templates/configuration for software template options
 
 catalog:
+  providers:
+    github:
+      # the provider ID can be any camelCase string
+      providerId:
+        organization: 'myles-liatrio-org' # string
+        catalogPath: '/catalog-info.yaml' # string
+        filters:
+          branch: 'main' # The branch to look in
+          repository: '.*' # Regex
+        schedule: # same options as in TaskScheduleDefinition
+          # supports cron, ISO duration, "human duration" as used in code
+          frequency: { minutes: 1 }
+          # supports ISO duration, "human duration" as used in code
+          timeout: { minutes: 3 }
+      wildcardProviderId:
+        organization: 'myles-liatrio-org'
+        catalogPath: '/**/template.yaml' # This will search all folders for files named template.yaml
+        filters:
+          branch: 'main' # The branch to look in
+          repository: '.*' # Regex
+        schedule:
+          frequency: { minutes: 1 }
+          timeout: { minutes: 3 }
+    githubOrg:
+      id: production
+      githubUrl: https://github.com
+      orgs: ['myles-liatrio-org']
+      schedule:
+        initialDelay: { seconds: 30 }
+        frequency: { hours: 1 }
+        timeout: { minutes: 50 }
+        
   import:
     entityFilename: catalog-info.yaml
     pullRequestBranchName: backstage-integration
   rules:
-    - allow: [Component, System, API, Resource, Location]
+    - allow: [Component, System, API, Resource, Location, Template]
   locations:
     # Local example data, file locations are relative to the backend process, typically `packages/backend`
     - type: file
       target: ../../examples/entities.yaml
-
-    # Local example template
-    - type: file
-      target: ../../examples/template/template.yaml
-      rules:
-        - allow: [Template]
 
     # Local example organizational data
     - type: file
@@ -99,12 +126,20 @@ catalog:
       rules:
         - allow: [User, Group]
 
-    ## Uncomment these lines to add more example data
-    # - type: url
-    #   target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all.yaml
+    # Demo template
+    - type: file
+      target: templates/template.yaml
+      rules:
+        - allow: [Template]
 
-    ## Uncomment these lines to add an example org
+    # Grabs catalog-info.yaml from remote repo in the same organization (doesn't work)
     # - type: url
-    #   target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme-corp.yaml
+    #   target: https://github.com/myles-liatrio-org/*/blob/main/catalog-info.yaml
     #   rules:
-    #     - allow: [User, Group]
+    #     - allow: [Component, API, User, Group]
+    
+    # Grabs template.yaml from specic remote repo (does work)
+    - type: url
+      target: https://github.com/myles-liatrio-org/org-repo/blob/main/template.yaml
+      rules:
+        - allow: [Template]

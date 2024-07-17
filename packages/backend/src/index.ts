@@ -14,12 +14,17 @@ backend.add(import('@backstage/plugin-app-backend/alpha'));
 backend.add(import('@backstage/plugin-proxy-backend/alpha'));
 backend.add(import('@backstage/plugin-scaffolder-backend/alpha'));
 backend.add(import('@backstage/plugin-techdocs-backend/alpha'));
+backend.add(import('@backstage/plugin-catalog-backend-module-github-org'));
+backend.add(import('@backstage/plugin-scaffolder-backend-module-github'));
+
+backend.add(import('../../../plugins/scaffolder-backend-module-test/src/actions/example'));
 
 // auth plugin
 backend.add(import('@backstage/plugin-auth-backend'));
 backend.add(import('@backstage/plugin-auth-backend-module-github-provider'))  
 // See https://backstage.io/docs/backend-system/building-backends/migrating#the-auth-plugin
 backend.add(import('@backstage/plugin-auth-backend-module-guest-provider'));
+backend.add(import('@backstage/plugin-catalog-backend-module-github/alpha'));
 // See https://backstage.io/docs/auth/guest/provider
 
 // catalog plugin
